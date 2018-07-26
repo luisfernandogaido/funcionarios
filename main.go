@@ -9,8 +9,17 @@ import (
 )
 
 func main() {
-	if err := modelo.Db(os.Getenv("MYSQL")); err != nil {
+	err := modelo.Db(
+		os.Getenv("MYSQL_USUARIO"),
+		os.Getenv("MYSQL_SENHA"),
+		os.Getenv("MYSQL_SERVIDOR"),
+		os.Getenv("MYSQL_BANCO"),
+	)
+	if err != nil {
 		log.Fatal(err)
 	}
-	log.Fatal(server.Start(":4003"))
+	if err = modelo.Rd(os.Getenv("REDIS")); err != nil {
+		log.Fatal(err)
+	}
+	server.Start(":" + os.Getenv("PORTA"))
 }
