@@ -1,0 +1,91 @@
+{
+	"_type": "export",
+	"__export_format": 3,
+	"__export_date": "2018-07-26T02:41:38.196Z",
+	"__export_source": "insomnia.desktop.app:v5.16.6",
+	"resources": [
+		{
+			"_id": "wrk_2ae99c8689124bf49bd5ad1237312cda",
+			"created": 1532572443799,
+			"description": "",
+			"modified": 1532572443799,
+			"name": "funcionarios",
+			"parentId": null,
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_edf8e18d2a3042b29e109d7b346c2e12",
+			"color": null,
+			"created": 1532572444264,
+			"data": {},
+			"isPrivate": false,
+			"modified": 1532572444264,
+			"name": "New Environment",
+			"parentId": "wrk_2ae99c8689124bf49bd5ad1237312cda",
+			"_type": "environment"
+		},
+		{
+			"_id": "jar_8be3f6a91c1d475ea1fedc49cef1538e",
+			"cookies": [],
+			"created": 1532572444267,
+			"modified": 1532572444267,
+			"name": "Default Jar",
+			"parentId": "wrk_2ae99c8689124bf49bd5ad1237312cda",
+			"_type": "cookie_jar"
+		},
+		{
+			"_id": "req_3ecc78da215f42158757235b67ab81fb",
+			"authentication": {},
+			"body": {},
+			"created": 1532572560950,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1532572560951,
+			"method": "GET",
+			"modified": 1532572585209,
+			"name": "search",
+			"parameters": [
+				{
+					"id": "pair_ce36bcf9980d4cf68c0dfe184248a144",
+					"name": "q",
+					"value": "LUIS FERNANDO"
+				}
+			],
+			"parentId": "wrk_2ae99c8689124bf49bd5ad1237312cda",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "{{ urlbase  }}/funcionarios/search",
+			"_type": "request"
+		},
+		{
+			"_id": "env_461f13169e6e4113ab58c18132bc0639",
+			"color": null,
+			"created": 1532572472854,
+			"data": {
+				"urlbase": "http://localhost:4003"
+			},
+			"isPrivate": false,
+			"modified": 1532572507555,
+			"name": "local",
+			"parentId": "env_edf8e18d2a3042b29e109d7b346c2e12",
+			"_type": "environment"
+		},
+		{
+			"_id": "env_7dc8c975732b44a1996157f0abcde117",
+			"color": null,
+			"created": 1532572478158,
+			"data": {
+				"urlbase": "http://104.131.64.134:4003"
+			},
+			"isPrivate": false,
+			"modified": 1532572549733,
+			"name": "do",
+			"parentId": "env_edf8e18d2a3042b29e109d7b346c2e12",
+			"_type": "environment"
+		}
+	]
+}
