@@ -1,14 +1,16 @@
 package client
 
 import (
-	"net/http"
-	"io/ioutil"
-	"regexp"
 	"encoding/xml"
+	"fmt"
+	"github.com/luisfernandogaido/funcionarios/modelo"
+	"io/ioutil"
+	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
-	"strings"
-	"strconv"
 )
 
 const root = "http://www2.correios.com.br/sobrecorreios/empresa/acessoinformacao/servidores"
@@ -116,4 +118,56 @@ func Funcionarios(letra string) ([]Funcionario, error) {
 		funcionarios = append(funcionarios, f)
 	}
 	return funcionarios, nil
+}
+
+func Importa() error {
+	letras, err := Letras()
+	if err != nil {
+		return err
+	}
+	conc := 29
+	sem := make(chan struct{}, conc)
+	chErr := make(chan error)
+	for _, letra := range letras {
+		sem <- struct{}{}
+		go func(l string) {
+			defer func() { <-sem }()
+			funcionarios, err := Funcionarios(l)
+			if err != nil {
+				chErr <- err
+				return
+			}
+			for _, f := range funcionarios {
+				fun := modelo.Funcionario{}
+				fun.Matricula = f.Matricula
+				fun.Nome = f.Nome
+				fun.Cpf = f.Cpf
+				fun.Admissao = f.Admissao
+				fun.Cargo = f.Cargo
+				fun.Funcao = f.Funcao
+				fun.Especialidade = f.Especialidade
+				fun.Dr = f.Dr
+				fun.Lotacao = f.Lotacao
+				fun.Referencia = f.Referencia
+				fun.Afastamento = f.Afastamento
+				fun.Indice = f.Matricula + " " + f.Nome + " " + f.Cargo + " " + f.Funcao + " " + f.Especialidade + " " +
+					f.Dr + " " + f.Lotacao + " " + f.Referencia
+				if err := fun.Salva(); err != nil {
+					chErr <- err
+				}
+			}
+		}(letra)
+	}
+	terminados := 0
+	for {
+		select {
+		case sem <- struct{}{}:
+			terminados++
+			if terminados == conc {
+				return nil
+			}
+		case err := <-chErr:
+			fmt.Println(err)
+		}
+	}
 }
