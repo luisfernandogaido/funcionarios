@@ -1,0 +1,19 @@
+[Unit]
+Description=Lista de servidores dos Correios
+After=network.target
+
+[Service]
+Type=simple
+Environment="MYSQL_SERVIDOR=localhost"
+Environment="MYSQL_USUARIO=root"
+Environment="MYSQL_SENHA=***************"
+Environment="MYSQL_BANCO=funcionarios"
+Environment="PORTA=4003"
+Environment="REDIS=127.0.0.1:6379"
+ExecStart=/var/www/html/funcionarios/funcionarios
+WorkingDirectory=/var/www/html/funcionarios
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

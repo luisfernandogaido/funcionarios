@@ -174,7 +174,9 @@ func FuncionarioMatricula(matricula string) (Funcionario, error) {
 		return Funcionario{}, err
 	}
 	if existe {
+		muRd.Lock()
 		bytes, err := redis.Bytes(rd.Do("GET", matricula))
+		muRd.Unlock()
 		if err != nil {
 			return Funcionario{}, err
 		}
@@ -229,14 +231,69 @@ func FuncionarioMatriculas(matriculas []string) (map[string]Funcionario, error) 
 
 func FuncionarioMatriculasConc(matriculas []string, concorrencia int) (map[string]Funcionario, error) {
 	mapa := make(map[string]Funcionario)
+	sem := make(chan struct{}, concorrencia)
+	chFun := make(chan Funcionario)
+	go func() {
+		for fun := range chFun {
+			if fun.Matricula != "" {
+				mapa[fun.Matricula] = fun
+			}
+		}
+	}()
 	for _, m := range matriculas {
-		fun, err := FuncionarioMatricula(m)
+		sem <- struct{}{}
+		go func(m string) {
+			defer func() { <-sem }()
+			fun, _ := FuncionarioMatricula(m)
+			chFun <- fun
+		}(m)
+	}
+	for i := 0; i < concorrencia; i++ {
+		sem <- struct{}{}
+	}
+	time.Sleep(time.Millisecond)
+	return mapa, nil
+}
+
+func Funcionarios(q string) ([]Funcionario, error) {
+	q = strings.ToLower(q)
+	palavras := make([]string, 0)
+	partes := strings.Split(q, " ")
+	for _, p := range partes {
+		palavras = append(palavras, "+"+strings.TrimSpace(p)+"*")
+	}
+	q = strings.Join(palavras, " ")
+	rows, err := db.Query("call funcionarios_seleciona(?)", q)
+	if err != nil {
+		return nil, err
+	}
+	funcionarios := make([]Funcionario, 0)
+	for rows.Next() {
+		fun := Funcionario{}
+		err = rows.Scan(
+			&fun.Matricula,
+			&fun.Nome,
+			&fun.Cpf,
+			&fun.Admissao,
+			&fun.Cargo,
+			&fun.Funcao,
+			&fun.Especialidade,
+			&fun.Dr,
+			&fun.Lotacao,
+			&fun.Jornada,
+			&fun.Referencia,
+			&fun.Afastamento,
+			&fun.Indice,
+		)
 		if err != nil {
 			return nil, err
 		}
-		mapa[m] = fun
+		if fun.Referencia == "" {
+			fun.Referencia = "NULL"
+		}
+		funcionarios = append(funcionarios, fun)
 	}
-	return mapa, nil
+	return funcionarios, nil
 }
 
 func MatriculasSorteadas() ([]string, error) {

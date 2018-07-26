@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"fmt"
 	"github.com/luisfernandogaido/funcionarios/modelo"
 	"strings"
 	"io/ioutil"
@@ -121,7 +120,7 @@ func matriculasConc(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	mapa, err := modelo.FuncionarioMatriculasConc(matriculas, 8)
+	mapa, err := modelo.FuncionarioMatriculasConc(matriculas, 4)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -130,7 +129,17 @@ func matriculasConc(w http.ResponseWriter, r *http.Request) {
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "oi")
+	q := r.URL.Query().Get("q")
+	if q == "" {
+		http.Error(w, "q obrigatória", http.StatusBadRequest)
+		return
+	}
+	funcionarios, err := modelo.Funcionarios(q)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	printJson(w, funcionarios)
 }
 
 func matriculasSorteadas(w http.ResponseWriter, r *http.Request) {
