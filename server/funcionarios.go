@@ -6,6 +6,7 @@ import (
 	"strings"
 	"io/ioutil"
 	"encoding/json"
+	"sort"
 )
 
 func drs(w http.ResponseWriter, r *http.Request) {
@@ -144,6 +145,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 
 func matriculasSorteadas(w http.ResponseWriter, r *http.Request) {
 	matriculas, err := modelo.MatriculasSorteadas()
+	sort.Strings(matriculas)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
