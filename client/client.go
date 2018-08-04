@@ -12,6 +12,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/luisfernandogaido/funcionarios/modelo"
+	"gopkg.in/mgo.v2"
+	"log"
 )
 
 const root = "http://www2.correios.com.br/sobrecorreios/empresa/acessoinformacao/servidores"
@@ -156,6 +158,77 @@ func Importa() error {
 				if err := fun.Salva(); err != nil {
 					chErr <- err
 				}
+			}
+		}(letra)
+	}
+	terminados := 0
+	for {
+		select {
+		case sem <- struct{}{}:
+			terminados++
+			if terminados == conc {
+				return nil
+			}
+		case err := <-chErr:
+			fmt.Println(err)
+		}
+	}
+}
+
+func ImportaMgo() error {
+
+	//sess, err := mgo.Dial("127.0.0.1:27017")
+	sess, err := mgo.DialWithInfo(&mgo.DialInfo{
+		Addrs:    []string{"104.131.64.134:27017"},
+		Timeout:  60 * time.Second,
+		Database: "admin",
+		Username: "root",
+		Password: "1000sonhosreais",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	collFun := sess.DB("funcionarios").C("funcionarios")
+	letras, err := Letras()
+	if err != nil {
+		return err
+	}
+	conc := 29
+	sem := make(chan struct{}, conc)
+	chErr := make(chan error)
+	for _, letra := range letras {
+		sem <- struct{}{}
+		go func(l string) {
+			defer func() { <-sem }()
+			funcionarios, err := Funcionarios(l)
+			if err != nil {
+				chErr <- err
+				return
+			}
+			inter := make([]interface{}, 0, len(funcionarios))
+			for _, f := range funcionarios {
+				inter = append(inter, f)
+				continue
+				fun := modelo.Funcionario{}
+				fun.Matricula = f.Matricula
+				fun.Nome = f.Nome
+				fun.Cpf = f.Cpf
+				fun.Admissao = f.Admissao
+				fun.Cargo = f.Cargo
+				fun.Funcao = f.Funcao
+				fun.Especialidade = f.Especialidade
+				fun.Dr = f.Dr
+				fun.Lotacao = f.Lotacao
+				fun.Referencia = f.Referencia
+				fun.Afastamento = f.Afastamento
+				fun.Indice = f.Matricula + " " + f.Nome + " " + f.Cargo + " " + f.Funcao + " " + f.Especialidade + " " +
+					f.Dr + " " + f.Lotacao + " " + f.Referencia
+				if err := collFun.Insert(fun); err != nil {
+					chErr <- err
+				}
+			}
+			if err := collFun.Insert(inter...); err != nil {
+				chErr <- err
 			}
 		}(letra)
 	}
