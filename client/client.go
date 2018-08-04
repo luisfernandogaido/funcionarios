@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/luisfernandogaido/funcionarios/modelo"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/luisfernandogaido/funcionarios/modelo"
 )
 
 const root = "http://www2.correios.com.br/sobrecorreios/empresa/acessoinformacao/servidores"
