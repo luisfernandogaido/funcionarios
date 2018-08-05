@@ -1,11 +1,12 @@
 package modelo
 
 import (
-	"time"
-	"strings"
 	"database/sql"
-	"github.com/gomodule/redigo/redis"
 	"encoding/json"
+	"github.com/gomodule/redigo/redis"
+	"gopkg.in/mgo.v2/bson"
+	"strings"
+	"time"
 )
 
 type Funcionario struct {
@@ -45,8 +46,8 @@ func (f Funcionario) Salva() error {
 }
 
 type drRes struct {
-	Dr          string `json:"dr"`
-	Ocorrencias int    `json:"ocorrencias"`
+	Dr          string `json:"dr" bson:"_id"`
+	Ocorrencias int    `json:"ocorrencias" bson:"total"`
 }
 
 func Drs() ([]drRes, error) {
@@ -65,7 +66,20 @@ func Drs() ([]drRes, error) {
 		drs = append(drs, dr)
 	}
 	return drs, nil
+}
 
+func DrsMongo() ([]drRes, error) {
+	drs := make([]drRes, 0)
+	pipe := []bson.M{
+		{"$group": bson.M{"_id": "$dr", "total": bson.M{"$sum": 1}}},
+	}
+	if err := Md.DB("funcionarios").C("funcionarios").Pipe(pipe).All(&drs); err != nil {
+		return nil, err
+	}
+	for i := range drs {
+		drs[i].Dr = strings.Replace(drs[i].Dr, "SE/", "", 1)
+	}
+	return drs, nil
 }
 
 func FuncionariosDr(dr string) ([]Funcionario, error) {
@@ -101,6 +115,12 @@ func FuncionariosDr(dr string) ([]Funcionario, error) {
 		ff = append(ff, f)
 	}
 	return ff, nil
+}
+func FuncionariosDrMongo(dr string) ([]Funcionario, error) {
+	dr = "SE/" + dr
+	var funcionarios []Funcionario
+	err := Md.DB("funcionarios").C("funcionarios").Find(bson.M{"dr": dr}).All(&funcionarios)
+	return funcionarios, err
 }
 
 type referenciaRes struct {

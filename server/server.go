@@ -1,14 +1,16 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 )
 
 func Start(addr string) error {
 	http.HandleFunc("/funcionarios/drs", drs)
+	http.HandleFunc("/funcionariosmongo/drs", drsMongo)
 	http.HandleFunc("/funcionarios/drs/", dr)
+	http.HandleFunc("/funcionariosmongo/drs/", drMongo)
 	http.HandleFunc("/funcionarios/referencias", referencias)
 	http.HandleFunc("/funcionarios/referencias/", referencia)
 	http.HandleFunc("/funcionarios/matriculas", matriculas)

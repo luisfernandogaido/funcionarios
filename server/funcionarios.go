@@ -1,16 +1,25 @@
 package server
 
 import (
-	"net/http"
-	"github.com/luisfernandogaido/funcionarios/modelo"
-	"strings"
-	"io/ioutil"
 	"encoding/json"
+	"github.com/luisfernandogaido/funcionarios/modelo"
+	"io/ioutil"
+	"net/http"
 	"sort"
+	"strings"
 )
 
 func drs(w http.ResponseWriter, r *http.Request) {
 	drs, err := modelo.Drs()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	printJson(w, drs)
+}
+
+func drsMongo(w http.ResponseWriter, r *http.Request) {
+	drs, err := modelo.DrsMongo()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -25,6 +34,20 @@ func dr(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	funcionarios, err := modelo.FuncionariosDr(dr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	printJson(w, funcionarios)
+}
+
+func drMongo(w http.ResponseWriter, r *http.Request) {
+	dr := strings.Replace(r.URL.Path, "/funcionariosmongo/drs/", "", 1)
+	if dr == "" {
+		http.Error(w, "dr obrigatória", http.StatusBadRequest)
+		return
+	}
+	funcionarios, err := modelo.FuncionariosDrMongo(dr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

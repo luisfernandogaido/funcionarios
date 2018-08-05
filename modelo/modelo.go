@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gomodule/redigo/redis"
+	"gopkg.in/mgo.v2"
 	"sync"
 )
 
@@ -13,6 +14,7 @@ var (
 	db   *sql.DB
 	muRd sync.Mutex
 	rd   redis.Conn
+	Md   *mgo.Session
 )
 
 func Db(usuario, senha, servidor, banco string) error {
@@ -31,5 +33,16 @@ func Db(usuario, senha, servidor, banco string) error {
 func Rd(addr string) error {
 	var err error
 	rd, err = redis.Dial("tcp", addr)
+	return err
+}
+
+func SetMd(addrs, database, username, password string) error {
+	var err error
+	Md, err = mgo.DialWithInfo(&mgo.DialInfo{
+		Addrs:    []string{addrs},
+		Database: database,
+		Username: username,
+		Password: password,
+	})
 	return err
 }

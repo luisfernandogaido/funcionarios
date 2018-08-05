@@ -13,7 +13,7 @@ import (
 
 	"github.com/luisfernandogaido/funcionarios/modelo"
 	"gopkg.in/mgo.v2"
-	"log"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const root = "http://www2.correios.com.br/sobrecorreios/empresa/acessoinformacao/servidores"
@@ -175,19 +175,7 @@ func Importa() error {
 	}
 }
 
-func ImportaMgo() error {
-
-	//sess, err := mgo.Dial("127.0.0.1:27017")
-	sess, err := mgo.DialWithInfo(&mgo.DialInfo{
-		Addrs:    []string{"104.131.64.134:27017"},
-		Timeout:  60 * time.Second,
-		Database: "admin",
-		Username: "root",
-		Password: "1000sonhosreais",
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
+func ImportaMgo(sess *mgo.Session) error {
 	collFun := sess.DB("funcionarios").C("funcionarios")
 	letras, err := Letras()
 	if err != nil {
@@ -205,10 +193,7 @@ func ImportaMgo() error {
 				chErr <- err
 				return
 			}
-			inter := make([]interface{}, 0, len(funcionarios))
 			for _, f := range funcionarios {
-				inter = append(inter, f)
-				continue
 				fun := modelo.Funcionario{}
 				fun.Matricula = f.Matricula
 				fun.Nome = f.Nome
@@ -223,12 +208,9 @@ func ImportaMgo() error {
 				fun.Afastamento = f.Afastamento
 				fun.Indice = f.Matricula + " " + f.Nome + " " + f.Cargo + " " + f.Funcao + " " + f.Especialidade + " " +
 					f.Dr + " " + f.Lotacao + " " + f.Referencia
-				if err := collFun.Insert(fun); err != nil {
+				if _, err := collFun.Upsert(bson.M{"matricula": fun.Matricula}, fun); err != nil {
 					chErr <- err
 				}
-			}
-			if err := collFun.Insert(inter...); err != nil {
-				chErr <- err
 			}
 		}(letra)
 	}

@@ -1,3 +1,7 @@
+#/lib/systemd/system
+#systemctl enable profipe.service
+#systemctl daemon-reload
+
 [Unit]
 Description=Lista de servidores dos Correios
 After=network.target
@@ -6,10 +10,18 @@ After=network.target
 Type=simple
 Environment="MYSQL_SERVIDOR=localhost"
 Environment="MYSQL_USUARIO=root"
-Environment="MYSQL_SENHA=***************"
+Environment="MYSQL_SENHA=1000sonhosreais"
 Environment="MYSQL_BANCO=funcionarios"
+
 Environment="PORTA=4003"
+
 Environment="REDIS=127.0.0.1:6379"
+
+Environment="MONGODB_ADDRS=104.131.64.134:27017"
+Environment="MONGODB_DATABASE=admin"
+Environment="MONGODB_USERNAME=root"
+Environment="MONGODB_PASSWORD=1000sonhosreais"
+
 ExecStart=/var/www/html/funcionarios/funcionarios
 WorkingDirectory=/var/www/html/funcionarios
 Restart=on-failure
