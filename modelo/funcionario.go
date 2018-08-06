@@ -70,10 +70,10 @@ func Drs() ([]drRes, error) {
 
 func DrsMongo() ([]drRes, error) {
 	drs := make([]drRes, 0)
-	pipe := []bson.M{
+	pipeline := []bson.M{
 		{"$group": bson.M{"_id": "$dr", "total": bson.M{"$sum": 1}}},
 	}
-	if err := Md.DB("funcionarios").C("funcionarios").Pipe(pipe).All(&drs); err != nil {
+	if err := Md.DB("funcionarios").C("funcionarios").Pipe(pipeline).All(&drs); err != nil {
 		return nil, err
 	}
 	for i := range drs {
