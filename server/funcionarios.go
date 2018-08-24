@@ -64,6 +64,15 @@ func referencias(w http.ResponseWriter, r *http.Request) {
 	printJson(w, referencias)
 }
 
+func referenciasMongo(w http.ResponseWriter, r *http.Request) {
+	referencias, err := modelo.Referencias()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	printJson(w, referencias)
+}
+
 func referencia(w http.ResponseWriter, r *http.Request) {
 	referencia := strings.Replace(r.URL.Path, "/funcionarios/referencias/", "", 1)
 	if referencia == "" {

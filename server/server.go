@@ -12,6 +12,7 @@ func Start(addr string) error {
 	http.HandleFunc("/funcionarios/drs/", dr)
 	http.HandleFunc("/funcionariosmongo/drs/", drMongo)
 	http.HandleFunc("/funcionarios/referencias", referencias)
+	http.HandleFunc("/funcionariosmongo/referencias", referenciasMongo)
 	http.HandleFunc("/funcionarios/referencias/", referencia)
 	http.HandleFunc("/funcionarios/matriculas", matriculas)
 	http.HandleFunc("/funcionarios/matriculasconc", matriculasConc)
